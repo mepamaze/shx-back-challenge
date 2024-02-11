@@ -3,7 +3,7 @@
 ## Dependencies
 - Java 17
 
-Please, note that you need to have JAVA_PATH and M2_PATH well configured on your device!
+Please, note that you need to have JAVA_PATH and M2_HOME well configured on your device!
 
 
 ## How to contribute
