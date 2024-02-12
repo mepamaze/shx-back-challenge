@@ -7,7 +7,7 @@ import java.util.Date;
 public class DateTimeUtil {
     public static String extrairData(String dataHora) throws ParseException {
         Date dataHoraCotacao = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dataHora);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         return dateFormat.format(dataHoraCotacao);
     }
 
