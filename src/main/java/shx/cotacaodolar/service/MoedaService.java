@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -67,13 +66,13 @@ public class MoedaService {
     }
 
     // o formato da data que o método recebe é "MM-dd-yyyy"
-    public List<Moeda>  getCotacoesPeriodo(String startDate, String endDate)
+    public List<Moeda>  getCotacoesPeriodo(String startDate, String endDate, Boolean filter)
             throws IOException, MalformedURLException, ParseException {
         Periodo periodo = new Periodo(startDate, endDate);
 
-        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?%40dataInicial='"
-                + periodo.getDataInicial() + "'&%40dataFinalCotacao='" + periodo.getDataFinal()
-                + "'&%24format=json&%24skip=0&%24top=" + periodo.getDiasEntreAsDatasMaisUm();
+        Moeda cotacao_corrente = filter ? getCotacao(null) : null;
+        
+        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='" + periodo.getDataInicial() + "'&@dataFinalCotacao='" + periodo.getDataFinal() + "'&$top=10000&$format=json" + (filter ? ("&$filter=cotacaoCompra%20lt%20" + cotacao_corrente.preco_compra) : "");
 
         URL url = new URL(urlString);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -85,14 +84,18 @@ public class MoedaService {
 
         List<Moeda> moedasLista = new ArrayList<Moeda>();
 
+        if (cotacoesArray == null || cotacoesArray.size() <= 0) {
+            return moedasLista;
+        }
+
         for (JsonElement obj : cotacoesArray) {
             Moeda moedaRef = new Moeda();
-            Date data = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                    .parse(obj.getAsJsonObject().get("dataHoraCotacao").getAsString());
+            String dataHoraCotacaoString = obj.getAsJsonObject().get("dataHoraCotacao").getAsString();
 
             moedaRef.preco_compra = obj.getAsJsonObject().get("cotacaoCompra").getAsDouble();
-            moedaRef.data = new SimpleDateFormat("dd/MM/yyyy").format(data);
-            moedaRef.hora = new SimpleDateFormat("HH:mm:ss").format(data);
+            moedaRef.preco_venda = obj.getAsJsonObject().get("cotacaoVenda").getAsDouble();
+            moedaRef.data = DateTimeUtil.extrairData(dataHoraCotacaoString);
+            moedaRef.hora = DateTimeUtil.extrairHora(dataHoraCotacaoString);
             moedasLista.add(moedaRef);
         }
         return moedasLista;
