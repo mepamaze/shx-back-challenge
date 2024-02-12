@@ -2,9 +2,19 @@
 
 ## Dependencies
 - Java 17
+- Maven
 
 Please, note that you need to have JAVA_PATH and M2_HOME well configured on your device!
 
+## How to Install
+```bash
+mvn install
+```
+
+## How to Run
+```bash
+mvn spring-boot:run
+```
 
 ## How to contribute
 
