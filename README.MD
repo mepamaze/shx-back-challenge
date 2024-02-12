@@ -1,5 +1,7 @@
 # BACK-END SHX Admission Test
 
+### The project's focus is to obtain information about the current dollar exchange rate.
+
 ## Dependencies
 - Java 17
 - Maven
@@ -14,6 +16,11 @@ mvn install
 ## How to Run
 ```bash
 mvn spring-boot:run
+```
+
+## How to execute tests
+```bash
+mvn test
 ```
 
 ## How to contribute
