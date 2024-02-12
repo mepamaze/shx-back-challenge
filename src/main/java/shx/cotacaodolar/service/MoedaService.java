@@ -24,21 +24,10 @@ import com.google.gson.JsonParser;
 
 import shx.cotacaodolar.model.Moeda;
 import shx.cotacaodolar.model.Periodo;
+import shx.cotacaodolar.utils.DateTimeUtil;
 
 @Service
 public class MoedaService {
-    private String extrairData(String dataHora) throws ParseException {
-        Date dataHoraCotacao = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dataHora);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.format(dataHoraCotacao);
-    }
-
-    private String extrairHora(String dataHora) throws ParseException {
-        Date dataHoraCotacao = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dataHora);
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-        return timeFormat.format(dataHoraCotacao);
-    } 
-
     public Moeda getCotacao(LocalDate data_param) throws IOException, MalformedURLException, ParseException {  
         LocalDate dia_cotacao = (data_param != null) ? data_param : LocalDate.now();
 
@@ -71,8 +60,8 @@ public class MoedaService {
 
         String dataHoraCotacaoString = cotacaoObj.get("dataHoraCotacao").getAsString();
 
-        cotacao.data = extrairData(dataHoraCotacaoString);
-        cotacao.hora = extrairHora(dataHoraCotacaoString);
+        cotacao.data = DateTimeUtil.extrairData(dataHoraCotacaoString);
+        cotacao.hora = DateTimeUtil.extrairHora(dataHoraCotacaoString);
 
         return cotacao;
     }
