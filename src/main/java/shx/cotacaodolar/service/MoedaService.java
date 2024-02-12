@@ -42,19 +42,12 @@ public class MoedaService {
     public Moeda getCotacao(LocalDate data_param) throws IOException, MalformedURLException, ParseException {  
         LocalDate dia_cotacao = (data_param != null) ? data_param : LocalDate.now();
 
-        // TO-DO: Levar em consideração feriados.
-        // Cotacao funciona apenas para dias úteis.
-        if (dia_cotacao.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            dia_cotacao = dia_cotacao.minusDays(1);
-        } else if (dia_cotacao.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            dia_cotacao = dia_cotacao.minusDays(2);
-        }
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
         String dia_cotacao_formatado = dia_cotacao.format(formatter);
-
-        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='"
-                + dia_cotacao_formatado + "'&$top=1&$format=json";
+        String periodo_verificacao_formatado = dia_cotacao.minusDays(8).format(formatter);
+        
+        // A cotação do dia corrente só é oficialmente liberada após ás 17:00 em dias úteis pelo banco central.
+        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='" + periodo_verificacao_formatado + "'&@dataFinalCotacao='" + dia_cotacao_formatado + "'&$top=1&$orderby=dataHoraCotacao%20desc&$format=json";
 
         URL url = new URL(urlString);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -67,14 +60,11 @@ public class MoedaService {
 
         Moeda cotacao = new Moeda();
 
-        // A cotação diária pelo banco central só é oficialmente liberada após ás 17:00
-        // e em dias úteis, antes disso o Json virá vazio.
         if (cotacaoJson == null || cotacaoJson.size() <= 0) {
             return cotacao;
         }
 
         JsonObject cotacaoObj = cotacaoJson.get(0).getAsJsonObject();
-
 
         cotacao.preco_compra = cotacaoObj.get("cotacaoCompra").getAsDouble();
         cotacao.preco_venda = cotacaoObj.get("cotacaoVenda").getAsDouble();
@@ -88,7 +78,7 @@ public class MoedaService {
     }
 
     // o formato da data que o método recebe é "MM-dd-yyyy"
-    public List<Moeda> getCotacoesPeriodo(String startDate, String endDate)
+    public List<Moeda>  getCotacoesPeriodo(String startDate, String endDate)
             throws IOException, MalformedURLException, ParseException {
         Periodo periodo = new Periodo(startDate, endDate);
 
