@@ -11,7 +11,11 @@ public class Moeda implements Serializable{
 
     @NotNull(message = "O preço não pode ser nulo")
     @Min(value = 0, message = "O preço não pode ser negativo")
-    public Double preco;
+    public Double preco_compra;
+
+    @NotNull(message = "O preço não pode ser nulo")
+    @Min(value = 0, message = "O preço não pode ser negativo")
+    public Double preco_venda;
 
     @NotNull(message = "A data não pode ser nula")
     public String data;
@@ -20,6 +24,6 @@ public class Moeda implements Serializable{
     public String hora;
 
     public String toString(){
-        return preco.toString() + data.toString() + hora;
+        return preco_compra.toString() + '_' + preco_venda.toString() + '_' + data.toString() + '_' + hora;
     }
 }

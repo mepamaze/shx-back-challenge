@@ -3,6 +3,7 @@ package shx.cotacaodolar.controller;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,10 @@ public class MoedaController {
     public List<Moeda> getCotacoesPeriodo(@PathVariable("data1") String startDate, @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException{
         return moedaService.getCotacoesPeriodo(startDate, endDate);
     }
-    
-    // Desenvolver uma rotina que retorna a cotação atual
+
     @GetMapping("/moeda/atual")
-    public List<Moeda> getCotacaoAtual() throws IOException, MalformedURLException, ParseException{
-        // return moedaService.getCotacaoAtual();
-        return null; // substituir pela chamada do método no service quando criado como está acima.
+    public Moeda getCotacaoAtual() throws IOException, MalformedURLException, ParseException{
+        return moedaService.getCotacao(null);
     }
     
     // Desenvolver uma rotina que recebe um período e retorna uma lista de cotações, somente com as cotações menores que a cotação atual.
