@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import shx.cotacaodolar.model.Moeda;
 import shx.cotacaodolar.service.MoedaService;
 
-
 @RestController
 @RequestMapping(value = "/")
 public class MoedaController {
@@ -27,22 +26,31 @@ public class MoedaController {
     private MoedaService moedaService;
 
     @GetMapping("/moeda/cotacao/{data}")
-    public Moeda getCotacoesData(@PathVariable("data") String data) throws IOException, MalformedURLException, ParseException{
+    public Moeda getCotacoesData(@PathVariable("data") String data)
+            throws IOException, MalformedURLException, ParseException {
         return moedaService.getCotacao(LocalDate.parse(data, DateTimeFormatter.ofPattern("MM-dd-yyyy")));
     }
 
     @GetMapping("/moeda/atual")
-    public Moeda getCotacaoAtual() throws IOException, MalformedURLException, ParseException{
+    public Moeda getCotacaoAtual() throws IOException, MalformedURLException, ParseException {
         return moedaService.getCotacao(null);
     }
 
     @GetMapping("/moeda/{data1}&{data2}")
-    public List<Moeda> getCotacoesPeriodo(@PathVariable("data1") String startDate, @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException{
+    public List<Moeda> getCotacoesPeriodo(@PathVariable("data1") String startDate,
+            @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException {
         return moedaService.getCotacoesPeriodo(startDate, endDate, false);
     }
 
     @GetMapping("/moeda/cotacao-menor/{data1}&{data2}")
-    public List<Moeda> getCotacoesMenoresAtual(@PathVariable("data1") String startDate, @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException{
+    public List<Moeda> getCotacoesMenoresAtual(@PathVariable("data1") String startDate,
+            @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException {
         return moedaService.getCotacoesPeriodo(startDate, endDate, true);
+    }
+
+    @GetMapping("/moeda/cotacao-maior/{data1}&{data2}")
+    public Moeda getCotacoesMaiorPeriodo(@PathVariable("data1") String startDate,
+            @PathVariable("data2") String endDate) throws IOException, MalformedURLException, ParseException {
+        return moedaService.getCotacoesMaiorPeriodo(startDate, endDate);
     }
 }

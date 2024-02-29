@@ -27,15 +27,18 @@ import shx.cotacaodolar.utils.DateTimeUtil;
 
 @Service
 public class MoedaService {
-    public Moeda getCotacao(LocalDate data_param) throws IOException, MalformedURLException, ParseException {  
+    public Moeda getCotacao(LocalDate data_param) throws IOException, MalformedURLException, ParseException {
         LocalDate dia_cotacao = (data_param != null) ? data_param : LocalDate.now();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
         String dia_cotacao_formatado = dia_cotacao.format(formatter);
         String periodo_verificacao_formatado = dia_cotacao.minusDays(8).format(formatter);
-        
-        // A cotação do dia corrente só é oficialmente liberada após ás 17:00 em dias úteis pelo banco central.
-        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='" + periodo_verificacao_formatado + "'&@dataFinalCotacao='" + dia_cotacao_formatado + "'&$top=1&$orderby=dataHoraCotacao%20desc&$format=json";
+
+        // A cotação do dia corrente só é oficialmente liberada após ás 17:00 em dias
+        // úteis pelo banco central.
+        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='"
+                + periodo_verificacao_formatado + "'&@dataFinalCotacao='" + dia_cotacao_formatado
+                + "'&$top=1&$orderby=dataHoraCotacao%20desc&$format=json";
 
         URL url = new URL(urlString);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -66,13 +69,16 @@ public class MoedaService {
     }
 
     // o formato da data que o método recebe é "MM-dd-yyyy"
-    public List<Moeda>  getCotacoesPeriodo(String startDate, String endDate, Boolean filter)
+    public List<Moeda> getCotacoesPeriodo(String startDate, String endDate, Boolean filter)
             throws IOException, MalformedURLException, ParseException {
         Periodo periodo = new Periodo(startDate, endDate);
 
         Moeda cotacao_corrente = filter ? getCotacao(null) : null;
-        
-        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='" + periodo.getDataInicial() + "'&@dataFinalCotacao='" + periodo.getDataFinal() + "'&$top=10000&$format=json" + (filter ? ("&$filter=cotacaoCompra%20lt%20" + cotacao_corrente.preco_compra) : "");
+
+        String urlString = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='"
+                + periodo.getDataInicial() + "'&@dataFinalCotacao='" + periodo.getDataFinal()
+                + "'&$top=10000&$format=json"
+                + (filter ? ("&$filter=cotacaoCompra%20lt%20" + cotacao_corrente.preco_compra) : "");
 
         URL url = new URL(urlString);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -99,6 +105,22 @@ public class MoedaService {
             moedasLista.add(moedaRef);
         }
         return moedasLista;
+    }
+
+    // o formato da data que o método recebe é "MM-dd-yyyy"
+    public Moeda getCotacoesMaiorPeriodo(String startDate, String endDate) throws IOException, MalformedURLException, ParseException {
+        List<Moeda> moedasLista =  this.getCotacoesPeriodo(startDate, endDate, false);
+
+        Moeda maior_periodo = new Moeda();
+        maior_periodo.preco_compra = 0.0;
+        for(Moeda moeda: moedasLista)
+        {
+            if(moeda.preco_compra > maior_periodo.preco_compra){
+                maior_periodo = moeda;
+            }
+        }
+
+        return maior_periodo;
     }
 
 }
